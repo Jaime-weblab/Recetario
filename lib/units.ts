@@ -17,8 +17,9 @@ export function parseQuantity(text: string): number | null {
 }
 
 // Número en formato español, con como mucho 2 decimales y sin ceros sobrantes: 1.5 → "1,5".
+// Sin separador de miles ("10000", no "10.000"): si no, al volver a leerlo el punto se tomaría como decimal.
 export function formatNumber(value: number): string {
-  return value.toLocaleString("es-ES", { maximumFractionDigits: 2 });
+  return value.toLocaleString("es-ES", { maximumFractionDigits: 2, useGrouping: false });
 }
 
 // Pasa a la unidad más cómoda de leer: 1500 g → 1,5 kg; 0,25 l → 250 ml.

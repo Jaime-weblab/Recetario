@@ -57,8 +57,11 @@ function move<T>(list: T[], index: number, delta: -1 | 1): T[] {
 }
 
 // Clases comunes de campos y etiquetas (text-base = 16 px, evita el zoom de iOS al tocar).
-const inputClass =
-  "h-11 w-full min-w-0 rounded-control border border-line bg-surface px-3 text-base outline-none focus:border-accent";
+// `fieldClass` no lleva anchura, relleno lateral ni tamaño de letra: así se le puede dar una fija (cantidad, unidad) sin conflictos.
+// Ojo: no mezclar dos valores de lo mismo (p. ej. w-full y w-16, text-base y text-lg) en un campo; gana uno al azar.
+const fieldClass =
+  "h-11 min-w-0 rounded-control border border-line bg-surface outline-none focus:border-accent";
+const inputClass = `${fieldClass} w-full px-3 text-base`;
 const labelClass = "mb-1 block text-sm text-muted";
 const sectionTitleClass = "mb-3 font-serif text-lg italic text-muted";
 
@@ -109,6 +112,13 @@ export default function RecipeForm({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    // Filas con cantidad o nota pero SIN nombre: avisamos en vez de descartarlas en silencio.
+    const unnamedRow = ingredients.find((r) => !r.name.trim() && (r.quantity.trim() || r.note.trim()));
+    if (unnamedRow) {
+      setError("Hay un ingrediente sin nombre. Escríbelo o quita esa fila.");
+      return;
+    }
 
     // Cantidades escritas pero no válidas (p. ej. "dos"): avisamos en vez de perderlas.
     const badRow = ingredients.find((r) => r.name.trim() && r.quantity.trim() && parseQuantity(r.quantity) == null);
@@ -165,7 +175,7 @@ export default function RecipeForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Lentejas con verduras"
-            className={`${inputClass} font-serif text-lg`}
+            className={`${fieldClass} w-full px-3 font-serif text-lg`}
           />
         </div>
 
@@ -226,13 +236,13 @@ export default function RecipeForm({
                   placeholder="200"
                   value={row.quantity}
                   onChange={(e) => updateIngredient(row.key, { quantity: e.target.value })}
-                  className={`${inputClass} w-16 shrink-0 px-2 text-center`}
+                  className={`${fieldClass} w-16 shrink-0 px-2 text-center text-base`}
                 />
                 <select
                   aria-label="Unidad"
                   value={row.unit}
                   onChange={(e) => updateIngredient(row.key, { unit: e.target.value as Unit | "" })}
-                  className={`${inputClass} w-20 shrink-0 px-2`}
+                  className={`${fieldClass} w-20 shrink-0 px-2 text-base`}
                 >
                   <option value="">—</option>
                   {UNITS.map((u) => (
@@ -245,7 +255,7 @@ export default function RecipeForm({
                   placeholder="garbanzos"
                   value={row.name}
                   onChange={(e) => updateIngredient(row.key, { name: e.target.value })}
-                  className={inputClass}
+                  className={`${fieldClass} flex-1 px-3 text-base`}
                 />
               </div>
               {/* Fila 2: nota opcional · borrar */}
