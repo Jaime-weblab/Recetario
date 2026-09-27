@@ -4,7 +4,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
-import { extractRecipe, ImportError } from "@/lib/import/claude";
+import { AiError } from "@/lib/ai";
+import { extractRecipe } from "@/lib/import/claude";
 
 export const maxDuration = 120;
 
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
     const recipe = await extractRecipe(blocks);
     return NextResponse.json({ recipe });
   } catch (error) {
-    if (error instanceof ImportError) return NextResponse.json({ error: error.message }, { status: 422 });
+    if (error instanceof AiError) return NextResponse.json({ error: error.message }, { status: 422 });
     console.error("importar/fotos", error);
     return NextResponse.json({ error: "Error inesperado al importar la receta." }, { status: 500 });
   }

@@ -2,7 +2,7 @@
 // Muchas webs de recetas incluyen la receta en un formato estándar legible por máquinas
 // (JSON-LD de schema.org, tipo "Recipe"). Si existe, usamos eso: es más fiable y más barato.
 // Si no, usamos el texto visible de la página.
-import { ImportError } from "@/lib/import/claude";
+import { AiError } from "@/lib/ai";
 
 const TIMEOUT_MS = 15_000;
 const MAX_HTML_BYTES = 3 * 1024 * 1024; // 3 MB de HTML como mucho
@@ -22,10 +22,10 @@ export function checkUrl(raw: string): URL {
   try {
     url = new URL(raw.trim());
   } catch {
-    throw new ImportError("El enlace no es válido.");
+    throw new AiError("El enlace no es válido.");
   }
   if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new ImportError("El enlace debe empezar por http:// o https://.");
+    throw new AiError("El enlace debe empezar por http:// o https://.");
   }
   const host = url.hostname.toLowerCase();
   const isPrivate =
@@ -34,7 +34,7 @@ export function checkUrl(raw: string): URL {
     host.endsWith(".internal") ||
     /^(127\.|10\.|0\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host) ||
     host.startsWith("[");
-  if (isPrivate) throw new ImportError("Ese enlace no está permitido.");
+  if (isPrivate) throw new AiError("Ese enlace no está permitido.");
   return url;
 }
 
@@ -62,10 +62,10 @@ export async function fetchRecipePage(rawUrl: string): Promise<WebPage> {
   try {
     response = await fetchWithTimeout(url.toString(), { headers: { Accept: "text/html" } });
   } catch {
-    throw new ImportError("No se ha podido abrir la web (tarda demasiado o no responde).");
+    throw new AiError("No se ha podido abrir la web (tarda demasiado o no responde).");
   }
   if (!response.ok) {
-    throw new ImportError(
+    throw new AiError(
       response.status === 403
         ? "Esa web no permite que la leamos. Prueba a hacer una captura y usar «Desde fotos»."
         : `La web ha respondido con un error (${response.status}).`,

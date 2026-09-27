@@ -101,6 +101,29 @@ export async function moveEntry(id: string, toDate: string, toMeal: Meal) {
   refresh();
 }
 
+// Guarda una propuesta de sugerencias aceptada. Los huecos que entretanto se hayan
+// ocupado se respetan (no se sobrescriben).
+export async function applySuggestions(items: { date: string; meal: Meal; recipe_id: string; servings: number }[]) {
+  const { supabase, userId } = await requireUser();
+  const rows = items.map((item) => {
+    checkSlot(item.date, item.meal);
+    return {
+      user_id: userId,
+      date: item.date,
+      meal: item.meal,
+      recipe_id: item.recipe_id,
+      servings: Math.max(1, Math.round(item.servings)),
+    };
+  });
+  if (rows.length === 0) return;
+  // ignoreDuplicates: si el hueco ya tiene plato, se deja como está.
+  const { error } = await supabase
+    .from("meal_plan_entries")
+    .upsert(rows, { onConflict: "user_id,date,meal", ignoreDuplicates: true });
+  if (error) throw new Error("No se han podido añadir las sugerencias.");
+  refresh();
+}
+
 // Menú de una semana, para el selector de huecos de "Añadir al menú" (se llama desde la ficha).
 export async function fetchWeekPlan(monday: string): Promise<PlanEntry[]> {
   if (!isIsoDate(monday)) throw new Error("Fecha no válida.");

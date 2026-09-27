@@ -3,7 +3,8 @@
 // No guarda la receta: la devuelve para que el usuario la revise en el formulario.
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { extractRecipe, ImportError } from "@/lib/import/claude";
+import { AiError } from "@/lib/ai";
+import { extractRecipe } from "@/lib/import/claude";
 import { downloadImage, fetchRecipePage } from "@/lib/import/web";
 import { PHOTO_BUCKET } from "@/lib/photo-paths";
 
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ recipe });
   } catch (error) {
-    if (error instanceof ImportError) return NextResponse.json({ error: error.message }, { status: 422 });
+    if (error instanceof AiError) return NextResponse.json({ error: error.message }, { status: 422 });
     console.error("importar/web", error);
     return NextResponse.json({ error: "Error inesperado al importar la receta." }, { status: 500 });
   }

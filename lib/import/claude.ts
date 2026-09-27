@@ -1,12 +1,10 @@
 // Conversión de una receta (texto de una web o fotos) a nuestro formato estructurado usando Claude.
 // SOLO SERVIDOR: usa ANTHROPIC_API_KEY, que nunca debe llegar al navegador.
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
+import { AI_MODEL, AiError, getAnthropic, toAiError } from "@/lib/ai";
 import { DISH_TYPES, UNITS, type RecipeInput } from "@/types/recipe";
-
-// Modelo indicado en el CLAUDE.md para las funciones de IA.
-const MODEL = "claude-sonnet-5";
 
 // ---- Forma EXACTA que debe tener la respuesta de Claude ----
 // El SDK obliga a Claude a responder con este esquema y lo valida al recibirlo.
@@ -58,23 +56,17 @@ Reglas:
 - Si el contenido no contiene una receta, devuelve found=false y deja el resto vacío.
 - No inventes datos que no estén en el contenido, salvo las conversiones de unidades y las estimaciones indicadas.`;
 
-// Error con un mensaje apto para enseñar al usuario.
-export class ImportError extends Error {}
-
 // Llama a Claude con el contenido (texto y/o imágenes) y devuelve la receta en formato RecipeInput.
 export async function extractRecipe(
   content: Anthropic.ContentBlockParam[],
   extra: { sourceUrl?: string; photoUrl?: string | null } = {},
 ): Promise<RecipeInput> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new ImportError("Falta configurar la clave de Anthropic (ANTHROPIC_API_KEY).");
-  }
-  const client = new Anthropic(); // lee ANTHROPIC_API_KEY del entorno
+  const client = getAnthropic();
 
   let response;
   try {
     response = await client.messages.parse({
-      model: MODEL,
+      model: AI_MODEL,
       max_tokens: 16000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content }],
@@ -84,29 +76,18 @@ export async function extractRecipe(
       },
     });
   } catch (error) {
-    console.error("extractRecipe", error);
-    if (error instanceof Anthropic.AuthenticationError) {
-      throw new ImportError("La clave de Anthropic no es válida.");
-    }
-    if (error instanceof Anthropic.RateLimitError) {
-      throw new ImportError("Demasiadas importaciones seguidas. Espera un minuto.");
-    }
-    // El caso típico de 400 aquí es que la cuenta de Anthropic se ha quedado sin saldo.
-    if (error instanceof Anthropic.BadRequestError) {
-      throw new ImportError("Claude ha rechazado la petición. Revisa que quede saldo en la cuenta de Anthropic.");
-    }
-    throw new ImportError("No se ha podido contactar con Claude. Inténtalo de nuevo.");
+    throw toAiError(error);
   }
 
   if (response.stop_reason === "refusal") {
-    throw new ImportError("Claude no ha podido procesar este contenido.");
+    throw new AiError("Claude no ha podido procesar este contenido.");
   }
   if (response.stop_reason === "max_tokens") {
-    throw new ImportError("La receta es demasiado larga para importarla de una vez.");
+    throw new AiError("La receta es demasiado larga para importarla de una vez.");
   }
   const parsed = response.parsed_output;
-  if (!parsed) throw new ImportError("La respuesta de Claude no tenía el formato esperado.");
-  if (!parsed.found) throw new ImportError("No se ha encontrado ninguna receta.");
+  if (!parsed) throw new AiError("La respuesta de Claude no tenía el formato esperado.");
+  if (!parsed.found) throw new AiError("No se ha encontrado ninguna receta.");
 
   return toRecipeInput(parsed, extra);
 }

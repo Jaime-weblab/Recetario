@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import BottomSheet from "@/components/BottomSheet";
 import RecipePicker from "@/components/RecipePicker";
+import SuggestSheet from "@/components/SuggestSheet";
 import WeekSlotList from "@/components/WeekSlotList";
 import { RecipeThumb } from "@/components/RecipeCard";
 import { ChevronLeftIcon, LeafIcon, PlusIcon } from "@/components/icons";
@@ -25,6 +26,7 @@ type Sheet =
   | { kind: "picker"; meal: Meal } // elegir receta para un hueco (vacío o para cambiarla)
   | { kind: "menu"; entry: PlanEntry } // opciones de un plato
   | { kind: "move"; entry: PlanEntry } // elegir destino al mover
+  | { kind: "suggest" } // sugerir menú con Claude
   | null;
 
 export default function WeekPlanner({
@@ -174,6 +176,17 @@ export default function WeekPlanner({
       </div>
       {error && !sheet && <p className="mt-3 text-sm text-red-700 dark:text-red-400">{error}</p>}
 
+      {/* Sugerir menú (solo en semanas que no han terminado) */}
+      {addDays(monday, 6) >= todayIso && (
+        <button
+          type="button"
+          onClick={() => setSheet({ kind: "suggest" })}
+          className="mt-4 h-12 w-full rounded-control border border-accent font-semibold text-accent"
+        >
+          Sugerir menú
+        </button>
+      )}
+
       {/* ---------- Hojas inferiores ---------- */}
       {sheet?.kind === "picker" && (
         <BottomSheet title={`${MEAL_LABELS[sheet.meal]} · ${dayLabel(selectedDate)}`} onClose={() => setSheet(null)}>
@@ -197,6 +210,12 @@ export default function WeekPlanner({
             onRemove={() => run(() => removeEntry(sheet.entry.id))}
           />
           {error && <p className="mt-3 text-sm text-red-700 dark:text-red-400">{error}</p>}
+        </BottomSheet>
+      )}
+
+      {sheet?.kind === "suggest" && (
+        <BottomSheet title="Sugerir menú" onClose={() => setSheet(null)}>
+          <SuggestSheet monday={monday} onDone={() => setSheet(null)} />
         </BottomSheet>
       )}
 
