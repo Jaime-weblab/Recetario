@@ -104,7 +104,7 @@ Despensa/inventario, información nutricional, compartir con otra persona, expor
 - Colores, esquinas y tipografías se definen solo en `app/globals.css` (clases `bg-accent`, `text-muted`,
   `border-line`, `rounded-card`, `rounded-control`, `font-serif`...). No usar colores sueltos en componentes.
 
-### Pantalla de Inicio (boceto `docs/bocetos/inicio.jpeg`)
+### Pantalla de Inicio (boceto `docs/boceto/Boceto.png`)
 - Arriba, selector de días de la semana en una fila: L M X J V S D. El día actual aparece
   seleccionado por defecto y marcado visualmente.
 - Debajo, dos tarjetas grandes apiladas para el día seleccionado: **Comida** y **Cena**.
@@ -113,7 +113,7 @@ Despensa/inventario, información nutricional, compartir con otra persona, expor
 - Deslizar lateralmente o flechas para cambiar de semana.
 - Modo claro y oscuro según el sistema.
 - Interfaz en español.
-- Bocetos de referencia en `docs/bocetos/` (seguirlos cuando existan).
+- Bocetos de referencia en `docs/boceto/` (seguirlos cuando existan).
 <!-- Completar aquí: tipografía, paleta y criterios visuales -->
 
 ## Estructura y convenciones
