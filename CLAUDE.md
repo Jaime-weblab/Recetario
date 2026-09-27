@@ -80,7 +80,7 @@ Genera las migraciones SQL en `supabase/migrations/`.
 - En iPhone: pegar el enlace en la app; opcionalmente un Atajo de iOS en el menú Compartir.
 - ✅ Hecho cuando: puedo importar una receta de una web o de una foto en un solo paso.
 
-### Fase 2 — Planificación semanal
+### Fase 2 — Planificación semanal — ✅ CERRADA (27-09-2026)
 - Pantalla de Inicio según el boceto: selector de día (L–D) + tarjetas Comida y Cena.
 - Asignar recetas a huecos, ajustar raciones, mover y quitar.
 - Navegar entre semanas.
@@ -96,6 +96,8 @@ Genera las migraciones SQL en `supabase/migrations/`.
 - (Importar desde URL/foto: movido a la Fase 1B.)
 - Sugerir un plan semanal a partir de mis recetas, aplicando los "Criterios de alimentación"
   (prioridad vegetariana, variedad, sin repetir platos recientes).
+  Deseo expreso (27-09-2026): que los días de la semana se rellenen con sugerencias, **al menos las cenas**
+  (rellenar solo los huecos vacíos; yo reviso y cambio lo que quiera).
 - Sugerir qué cocinar con lo que tengo.
 - Modelo: `claude-sonnet-5`. Respuestas en JSON validado antes de guardar.
 - ✅ Hecho cuando: me sugiere un menú semanal variado y con prioridad vegetariana a partir de mis recetas.
