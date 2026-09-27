@@ -1,5 +1,5 @@
-// Ficha de una receta: foto, datos, ingredientes, pasos y acciones (editar, borrar, favorita).
-// El selector de raciones que recalcula cantidades llega en la parte 6.
+// Ficha de una receta: foto, datos, ingredientes (con selector de raciones), pasos
+// y acciones (editar, borrar, favorita).
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,7 +7,8 @@ import DeleteRecipeButton from "@/components/DeleteRecipeButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { ChevronLeftIcon, ClockIcon, LeafIcon } from "@/components/icons";
 import { getRecipe } from "@/lib/recipes";
-import { formatMinutes, formatQuantity } from "@/lib/units";
+import ScaledIngredients from "@/components/ScaledIngredients";
+import { formatMinutes } from "@/lib/units";
 import { DISH_TYPE_LABELS } from "@/types/recipe";
 
 // El título de la pestaña es el de la receta.
@@ -64,19 +65,7 @@ export default async function RecipePage({ params }: PageProps<"/recetas/[id]">)
       {recipe.ingredients.length > 0 && (
         <section className="mt-8">
           <h2 className={sectionTitle}>Ingredientes</h2>
-          <ul className="flex flex-col">
-            {recipe.ingredients.map((line) => (
-              <li key={line.id} className="flex gap-3 border-b border-line/60 py-2 last:border-0">
-                <span className="w-20 shrink-0 text-right font-medium">
-                  {formatQuantity(line.quantity, line.unit)}
-                </span>
-                <span>
-                  {line.ingredient.name}
-                  {line.note && <span className="text-muted">, {line.note}</span>}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <ScaledIngredients baseServings={recipe.servings} lines={recipe.ingredients} />
         </section>
       )}
 
