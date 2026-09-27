@@ -1,9 +1,11 @@
 "use client";
 // Selector de la foto del plato dentro del formulario.
 // Al tocarlo, el iPhone muestra su menú nativo (Hacer foto / Fototeca / Archivos).
+// También se puede pegar una imagen copiada (botón "Pegar imagen").
 // La foto se reduce y se sube en cuanto se elige; el formulario solo guarda su URL.
 import { useRef, useState } from "react";
 import { BowlIcon, TrashIcon } from "@/components/icons";
+import { ClipboardError, readClipboardImage } from "@/lib/clipboard";
 import { uploadRecipePhoto } from "@/lib/photos";
 
 export default function PhotoPicker({
@@ -34,6 +36,16 @@ export default function PhotoPicker({
       onUploadingChange(false);
       // Vaciamos el campo para poder elegir otra vez la misma foto si hiciera falta.
       if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  // Lee la imagen copiada y la sube como foto del plato.
+  async function pasteImage() {
+    setError(null);
+    try {
+      await handleFile(await readClipboardImage());
+    } catch (e) {
+      setError(e instanceof ClipboardError ? e.message : "No se ha podido pegar la imagen.");
     }
   }
 
@@ -74,24 +86,35 @@ export default function PhotoPicker({
         )}
       </button>
 
-      {/* Acciones cuando ya hay foto */}
-      {value && !uploading && (
+      {/* Acciones: pegar (siempre) y, si ya hay foto, cambiarla o quitarla */}
+      {!uploading && (
         <div className="mt-2 flex gap-2">
+          {value && (
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="h-11 flex-1 rounded-control border border-line text-sm"
+            >
+              Cambiar
+            </button>
+          )}
           <button
             type="button"
-            onClick={() => inputRef.current?.click()}
+            onClick={pasteImage}
             className="h-11 flex-1 rounded-control border border-line text-sm"
           >
-            Cambiar foto
+            Pegar imagen
           </button>
-          <button
-            type="button"
-            onClick={() => onChange(null)}
-            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-control border border-line text-sm text-muted"
-          >
-            <TrashIcon className="size-4" />
-            Quitar foto
-          </button>
+          {value && (
+            <button
+              type="button"
+              onClick={() => onChange(null)}
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-control border border-line text-sm text-muted"
+            >
+              <TrashIcon className="size-4" />
+              Quitar
+            </button>
+          )}
         </div>
       )}
       {error && <p className="mt-2 text-sm text-red-700 dark:text-red-400">{error}</p>}

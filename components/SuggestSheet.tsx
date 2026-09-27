@@ -1,16 +1,26 @@
 "use client";
 // Contenido de la hoja "Sugerir menú" de Inicio:
-//   1. Elegir qué rellenar (solo cenas, o comidas y cenas).
+//   1. Elegir semana (la mostrada o la siguiente) y qué rellenar (solo cenas, o comidas y cenas).
 //   2. Claude propone recetas para los huecos vacíos → se muestran para revisar.
 //   3. "Añadir al menú" las guarda; "Otra propuesta" vuelve a preguntar.
 import { useState, useTransition } from "react";
 import { applySuggestions } from "@/app/(app)/plan-actions";
-import { dayLabel } from "@/lib/dates";
+import { addDays, dayLabel, weekLabel } from "@/lib/dates";
 import { MEAL_LABELS, type Meal } from "@/types/plan";
 
 type Suggestion = { date: string; meal: Meal; recipe_id: string; title: string; servings: number };
 
-export default function SuggestSheet({ monday, onDone }: { monday: string; onDone: () => void }) {
+export default function SuggestSheet({
+  monday,
+  startWithNextWeek,
+  onDone,
+}: {
+  monday: string; // semana que se está viendo en Inicio
+  startWithNextWeek: boolean; // true si en la semana mostrada ya no quedan cenas libres
+  onDone: (targetMonday: string) => void; // tras guardar: a qué semana ir
+}) {
+  // Semana a rellenar: la mostrada o la siguiente.
+  const [target, setTarget] = useState(startWithNextWeek ? addDays(monday, 7) : monday);
   const [meals, setMeals] = useState<Meal[]>(["cena"]); // por defecto, solo cenas
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
@@ -26,7 +36,7 @@ export default function SuggestSheet({ monday, onDone }: { monday: string; onDon
       const response = await fetch("/api/sugerir", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ monday, meals }),
+        body: JSON.stringify({ monday: target, meals }),
       });
       const data = (await response.json().catch(() => ({}))) as { suggestions?: Suggestion[]; error?: string };
       if (!response.ok || !data.suggestions) setError(data.error ?? "No se ha podido sugerir el menú.");
@@ -44,7 +54,7 @@ export default function SuggestSheet({ monday, onDone }: { monday: string; onDon
     startSaving(async () => {
       try {
         await applySuggestions(suggestions);
-        onDone();
+        onDone(target);
       } catch {
         setError("No se han podido añadir al menú.");
       }
@@ -56,12 +66,30 @@ export default function SuggestSheet({ monday, onDone }: { monday: string; onDon
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Qué semana (al cambiarla se descarta la propuesta anterior) */}
+      <div className="flex gap-1 rounded-control border border-line bg-surface p-1">
+        {[monday, addDays(monday, 7)].map((week) => (
+          <button
+            key={week}
+            type="button"
+            className={optionClass(target === week)}
+            onClick={() => {
+              setTarget(week);
+              setSuggestions(null);
+              setError(null);
+            }}
+          >
+            {weekLabel(week).replace("Semana del ", "Sem. ")}
+          </button>
+        ))}
+      </div>
+
       {/* Qué rellenar */}
       <div className="flex gap-1 rounded-control border border-line bg-surface p-1">
-        <button type="button" className={optionClass(meals.length === 1)} onClick={() => setMeals(["cena"])}>
+        <button type="button" className={optionClass(meals.length === 1)} onClick={() => { setMeals(["cena"]); setSuggestions(null); }}>
           Solo cenas
         </button>
-        <button type="button" className={optionClass(meals.length === 2)} onClick={() => setMeals(["comida", "cena"])}>
+        <button type="button" className={optionClass(meals.length === 2)} onClick={() => { setMeals(["comida", "cena"]); setSuggestions(null); }}>
           Comidas y cenas
         </button>
       </div>

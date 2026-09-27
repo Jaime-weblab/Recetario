@@ -1,11 +1,12 @@
 "use client";
 // Pantalla de importación de recetas (Fase 1B), en dos pasos:
-//   1. Elegir origen: pegar un enlace de una web, o hacer/elegir de 1 a 3 fotos (libro, capturas).
+//   1. Elegir origen: pegar un enlace de una web, o hacer/elegir/pegar de 1 a 3 fotos (libro, capturas).
 //   2. Claude la convierte (en el servidor) y se abre el formulario de receta YA RELLENO para revisar.
 // Nada se guarda hasta que el usuario pulsa "Guardar receta" en el formulario.
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import RecipeForm from "@/components/RecipeForm";
 import { PlusIcon, TrashIcon } from "@/components/icons";
+import { ClipboardError, imageFromPasteEvent, readClipboardImage } from "@/lib/clipboard";
 import { blobToBase64, resizeImage } from "@/lib/photos";
 import type { RecipeInput } from "@/types/recipe";
 
@@ -71,13 +72,36 @@ export default function RecipeImporter({ ingredientNames }: { ingredientNames: s
     }
   }
 
-  // Añade las fotos elegidas (hasta el máximo) con una miniatura para verlas.
-  function addPhotos(files: FileList | null) {
-    if (!files) return;
-    const added = Array.from(files).map((file) => ({ file, preview: URL.createObjectURL(file) }));
+  // Añade fotos (elegidas o pegadas), hasta el máximo, con una miniatura para verlas.
+  function addPhotos(files: File[]) {
+    const added = files.map((file) => ({ file, preview: URL.createObjectURL(file) }));
     setPhotos((current) => [...current, ...added].slice(0, MAX_PHOTOS));
     if (fileInput.current) fileInput.current.value = "";
   }
+
+  // Botón "Pegar imagen": lee la imagen copiada (en iPhone aparece la burbuja "Pegar").
+  async function pasteImage() {
+    setError(null);
+    try {
+      addPhotos([await readClipboardImage()]);
+    } catch (e) {
+      setError(e instanceof ClipboardError ? e.message : "No se ha podido pegar la imagen.");
+    }
+  }
+
+  // En el ordenador: Ctrl+V / Cmd+V con la pestaña de fotos abierta también añade la imagen.
+  useEffect(() => {
+    if (mode !== "fotos" || recipe) return;
+    const onPaste = (event: ClipboardEvent) => {
+      const file = imageFromPasteEvent(event);
+      if (file) {
+        event.preventDefault();
+        addPhotos([file]);
+      }
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [mode, recipe]);
 
   // ---- Paso 2: receta importada → formulario relleno para revisar ----
   if (recipe) {
@@ -147,7 +171,7 @@ export default function RecipeImporter({ ingredientNames }: { ingredientNames: s
             accept="image/*"
             multiple
             className="hidden"
-            onChange={(e) => addPhotos(e.target.files)}
+            onChange={(e) => addPhotos(Array.from(e.target.files ?? []))}
           />
           {/* Miniaturas de las fotos elegidas */}
           {photos.length > 0 && (
@@ -169,14 +193,23 @@ export default function RecipeImporter({ ingredientNames }: { ingredientNames: s
             </ul>
           )}
           {photos.length < MAX_PHOTOS && (
-            <button
-              type="button"
-              onClick={() => fileInput.current?.click()}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-control border border-dashed border-line text-sm text-accent"
-            >
-              <PlusIcon className="size-4" />
-              {photos.length === 0 ? "Hacer o elegir fotos" : "Añadir otra foto"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => fileInput.current?.click()}
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-control border border-dashed border-line text-sm text-accent"
+              >
+                <PlusIcon className="size-4" />
+                {photos.length === 0 ? "Hacer o elegir" : "Añadir otra"}
+              </button>
+              <button
+                type="button"
+                onClick={pasteImage}
+                className="flex h-11 flex-1 items-center justify-center rounded-control border border-dashed border-line text-sm text-accent"
+              >
+                Pegar imagen
+              </button>
+            </div>
           )}
           <button
             type="button"

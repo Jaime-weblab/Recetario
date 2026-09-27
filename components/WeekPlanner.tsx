@@ -215,7 +215,15 @@ export default function WeekPlanner({
 
       {sheet?.kind === "suggest" && (
         <BottomSheet title="Sugerir menú" onClose={() => setSheet(null)}>
-          <SuggestSheet monday={monday} onDone={() => setSheet(null)} />
+          <SuggestSheet
+            monday={monday}
+            // Si en esta semana ya no quedan cenas libres (p. ej. un domingo), se propone la siguiente.
+            startWithNextWeek={!dates.some((d) => d >= todayIso && !entries.some((e) => e.date === d && e.meal === "cena"))}
+            onDone={(target) => {
+              setSheet(null);
+              if (target !== monday) router.push(`/?semana=${target}&dia=0`);
+            }}
+          />
         </BottomSheet>
       )}
 
