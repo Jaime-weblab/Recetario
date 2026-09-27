@@ -86,7 +86,7 @@ Genera las migraciones SQL en `supabase/migrations/`.
 - Navegar entre semanas.
 - ✅ Hecho cuando: puedo planificar una semana completa en pocos toques.
 
-### Fase 3 — Lista de la compra
+### Fase 3 — Lista de la compra — ✅ CERRADA (27-09-2026)
 - Generar lista a partir del plan semanal: sumar cantidades del mismo ingrediente y unidad.
 - Agrupar por sección del súper.
 - Marcar como comprado, añadir artículos manuales.
