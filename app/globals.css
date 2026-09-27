@@ -1,0 +1,59 @@
+/* Estilos globales: Tailwind + la paleta de colores de la app (claro y oscuro). */
+@import "tailwindcss";
+
+/* ---- Paleta (modo claro) ----
+   Se usa en Tailwind como bg-background, text-muted, border-line, bg-accent, etc. */
+:root {
+  --background: #f7f6f2; /* fondo general, blanco roto cálido */
+  --surface: #ffffff; /* tarjetas y campos */
+  --foreground: #1c1b19; /* texto principal */
+  --muted: #6b675f; /* texto secundario */
+  --line: #e4e1d9; /* bordes y separadores */
+  --accent: #3f7d4e; /* verde "huerta": botones y elemento activo */
+}
+
+/* ---- Modo oscuro: se activa solo si el sistema (iPhone) está en oscuro ---- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #121210;
+    --surface: #1d1c19;
+    --foreground: #eeece6;
+    --muted: #a19c92;
+    --line: #2e2d29;
+    --accent: #5fa56f;
+  }
+}
+
+/* Conecta las variables anteriores con las clases de Tailwind. */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+}
+
+/* ---- Safe areas: márgenes para el notch / isla y la barra de gestos del iPhone ----
+   env(safe-area-inset-*) solo tiene valor si el viewport usa viewport-fit=cover (ver layout.tsx). */
+@utility safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+html {
+  /* Evita que iOS agrande el texto al girar el móvil. */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  /* Quita el recuadro gris que iOS pinta al tocar un enlace. */
+  -webkit-tap-highlight-color: transparent;
+  /* Evita el "rebote" que deja ver el fondo por encima/debajo de la app. */
+  overscroll-behavior: none;
+}
