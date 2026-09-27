@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PHOTO_BUCKET, photoPathFromUrl } from "@/lib/photo-paths";
 import { DISH_TYPES, UNITS, type RecipeInput } from "@/types/recipe";
+import { SECTIONS, type ShoppingSection } from "@/types/shopping";
 
 // Devuelve el cliente de Supabase y el id del usuario, o lanza error si no hay sesión.
 async function requireUser() {
@@ -58,6 +59,7 @@ function validate(input: RecipeInput) {
       quantity: line.quantity != null && line.quantity > 0 ? line.quantity : null,
       unit: line.unit && UNITS.includes(line.unit) ? line.unit : null,
       note: clean(line.note),
+      section: line.section && SECTIONS.includes(line.section) ? line.section : null,
     }))
     .filter((line) => line.name);
 
@@ -87,22 +89,29 @@ function validate(input: RecipeInput) {
 // Devuelve un mapa "nombre en minúscula" → id.
 async function resolveIngredientIds(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  lines: { name: string; unit: string | null }[],
+  lines: { name: string; unit: string | null; section: ShoppingSection | null }[],
 ) {
   const ids = new Map<string, string>();
   if (lines.length === 0) return ids;
 
   // El catálogo de una persona es pequeño: lo traemos entero y comparamos aquí.
-  const { data: existing, error } = await supabase.from("ingredients").select("id, name");
+  const { data: existing, error } = await supabase.from("ingredients").select("id, name, shopping_section");
   if (error) throw new Error(error.message);
   for (const row of existing ?? []) ids.set(row.name.toLowerCase(), row.id);
 
+  // Ingredientes que ya existían en "otros" y ahora nos llega su sección (importación): la guardamos.
+  for (const row of existing ?? []) {
+    if (row.shopping_section !== "otros") continue;
+    const line = lines.find((l) => l.section && l.section !== "otros" && l.name.toLowerCase() === row.name.toLowerCase());
+    if (line) await supabase.from("ingredients").update({ shopping_section: line.section }).eq("id", row.id);
+  }
+
   // Ingredientes nuevos (sin repetir). Su unidad habitual será la usada en esta receta.
-  const missing = new Map<string, { name: string; default_unit: string | null }>();
+  const missing = new Map<string, { name: string; default_unit: string | null; shopping_section: ShoppingSection }>();
   for (const line of lines) {
     const key = line.name.toLowerCase();
     if (!ids.has(key) && !missing.has(key)) {
-      missing.set(key, { name: line.name, default_unit: line.unit });
+      missing.set(key, { name: line.name, default_unit: line.unit, shopping_section: line.section ?? "otros" });
     }
   }
   if (missing.size > 0) {

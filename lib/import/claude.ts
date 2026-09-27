@@ -5,6 +5,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { AI_MODEL, AiError, getAnthropic, toAiError } from "@/lib/ai";
 import { DISH_TYPES, UNITS, type RecipeInput } from "@/types/recipe";
+import { SECTIONS } from "@/types/shopping";
 
 // ---- Forma EXACTA que debe tener la respuesta de Claude ----
 // El SDK obliga a Claude a responder con este esquema y lo valida al recibirlo.
@@ -25,6 +26,7 @@ const ImportedRecipeSchema = z.object({
       quantity: z.number().nullable(),
       unit: z.enum(UNITS).nullable(),
       note: z.string().nullable(),
+      section: z.enum(SECTIONS),
     }),
   ),
   steps: z.array(z.string()),
@@ -44,6 +46,7 @@ Reglas:
     tazas → ml (1 taza = 240 ml) o g si es un sólido conocido (harina ~120 g/taza, azúcar ~200 g/taza, arroz ~185 g/taza);
     oz → g (28 g); lb → g (454 g); fl oz → ml (30 ml); "un diente", "una cebolla" → ud. null si no hay cantidad.
   - "note": preparación o aclaración ("picada", "en dados", "al gusto", "opcional"). null si no hay.
+  - "section": sección del supermercado donde se compra: fruteria (frutas, verduras, hierbas frescas), carniceria, pescaderia (también marisco), lacteos (leche, queso, yogur, nata, mantequilla, huevos), despensa (legumbres secas o cocidas, pasta, arroz, harina, aceite, especias, conservas, caldos), congelados, otros.
 - Pasos: una entrada por paso, sin numerar, claros y fieles al original. No inventes pasos.
 - servings: número de raciones si aparece; si no, estímalo razonablemente o null.
 - prep_minutes / cook_minutes: en minutos si aparecen o se deducen claramente; si no, null.
@@ -118,6 +121,7 @@ function toRecipeInput(
         quantity: positive(i.quantity),
         unit: i.unit,
         note: i.note ?? "",
+        section: i.section,
       })),
     steps: r.steps.map((s) => s.trim()).filter(Boolean),
   };

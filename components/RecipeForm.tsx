@@ -19,15 +19,23 @@ import {
   type RecipeInput,
   type Unit,
 } from "@/types/recipe";
+import type { ShoppingSection } from "@/types/shopping";
 
 // Fila de ingrediente mientras se edita. La cantidad es texto (para permitir "1,5" o "1/2")
 // y `key` es un identificador interno para que React no mezcle filas al borrar o mover.
-type IngredientRow = { key: number; quantity: string; unit: Unit | ""; name: string; note: string };
+type IngredientRow = {
+  key: number;
+  quantity: string;
+  unit: Unit | "";
+  name: string;
+  note: string;
+  section: ShoppingSection | null; // no se muestra: viene de la importación
+};
 type StepRow = { key: number; text: string };
 
 // Contador para dar un `key` único a cada fila nueva.
 let nextKey = 1;
-const newIngredient = (): IngredientRow => ({ key: nextKey++, quantity: "", unit: "", name: "", note: "" });
+const newIngredient = (): IngredientRow => ({ key: nextKey++, quantity: "", unit: "", name: "", note: "", section: null });
 const newStep = (): StepRow => ({ key: nextKey++, text: "" });
 
 // Receta vacía (formulario de "Nueva receta").
@@ -97,6 +105,7 @@ export default function RecipeForm({
           unit: i.unit ?? "",
           name: i.name,
           note: i.note,
+          section: i.section ?? null,
         }))
       : [newIngredient()],
   );
@@ -148,6 +157,7 @@ export default function RecipeForm({
         quantity: parseQuantity(r.quantity),
         unit: r.unit || null,
         note: r.note,
+        section: r.section,
       })),
       steps: steps.map((s) => s.text),
     };

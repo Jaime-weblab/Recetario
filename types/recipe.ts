@@ -1,6 +1,8 @@
 // Tipos de datos de las recetas (reflejan las tablas de supabase/migrations/…_recipes.sql)
 // y listas fijas (unidades, tipos de plato) con sus textos en español para la interfaz.
 
+import type { ShoppingSection } from "@/types/shopping";
+
 // ---- Unidades permitidas (mismas que en la base de datos) ----
 export const UNITS = ["g", "kg", "ml", "l", "ud", "cda", "cdta", "pizca"] as const;
 export type Unit = (typeof UNITS)[number];
@@ -106,6 +108,9 @@ export type RecipeInput = {
     quantity: number | null;
     unit: Unit | null;
     note: string;
+    // Sección del súper (la propone Claude al importar). Solo se usa al crear el ingrediente
+    // en el catálogo o si allí estaba en "otros".
+    section?: ShoppingSection | null;
   }[];
   steps: string[];
 };
