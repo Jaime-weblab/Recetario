@@ -8,6 +8,23 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+// Traduce los errores de Supabase al pedir el email a un mensaje claro en español.
+function sendErrorMessage(code: string | undefined, message: string) {
+  // Mismo email pedido hace menos de 60 segundos ("...only request this after N seconds").
+  if (/seconds/i.test(message)) {
+    return "Acabas de pedir un email. Espera un minuto antes de pedir otro.";
+  }
+  // Límite de envíos del correo por defecto de Supabase (unos pocos por hora).
+  if (code === "over_email_send_rate_limit" || code === "over_request_rate_limit") {
+    return "Demasiados emails enviados. Espera alrededor de una hora y pide solo uno.";
+  }
+  // El registro está cerrado y ese email no tiene cuenta (¿errata?).
+  if (code === "otp_disabled" || code === "signup_disabled" || /signups not allowed/i.test(message)) {
+    return "Este email no tiene acceso. Revisa que esté bien escrito.";
+  }
+  return "No se ha podido enviar el email. Inténtalo de nuevo más tarde.";
+}
+
 export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -28,7 +45,7 @@ export default function LoginForm() {
     });
     setLoading(false);
     if (error) {
-      setError("No se ha podido enviar el email. Revisa la dirección o espera un minuto.");
+      setError(sendErrorMessage(error.code, error.message));
       return;
     }
     setStep("code");
