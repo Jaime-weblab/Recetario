@@ -64,7 +64,7 @@ Genera las migraciones SQL en `supabase/migrations/`.
 - Despliegue en Vercel funcionando.
 - ✅ Hecho cuando: puedo instalarla en el iPhone y entrar con mi email.
 
-### Fase 1 — Recetario
+### Fase 1 — Recetario — ✅ CERRADA (27-09-2026; pendiente probar fotos del plato)
 - Crear, editar, borrar y ver recetas (con ingredientes, pasos y foto).
 - Listado con búsqueda, filtro por tipo de plato/etiqueta y favoritas.
 - Escalado de raciones en la ficha de receta.
@@ -74,7 +74,7 @@ Genera las migraciones SQL en `supabase/migrations/`.
 - Fotos del plato en Supabase Storage, bucket público (URLs no adivinables), redimensionadas en el móvil antes de subir.
 - ✅ Hecho cuando: puedo guardar y consultar recetas cómodamente desde el móvil.
 
-### Fase 1B — Importar recetas (adelantada de la Fase 4, decidido el 27-09-2026)
+### Fase 1B — Importar recetas (adelantada de la Fase 4) — ✅ CERRADA (27-09-2026; pendiente probar importar desde fotos)
 - Importar desde página web (pegar URL) y desde foto (libro, captura), con Claude en el servidor.
 - El resultado abre el formulario de receta pre-rellenado para revisar antes de guardar.
 - En iPhone: pegar el enlace en la app; opcionalmente un Atajo de iOS en el menú Compartir.
