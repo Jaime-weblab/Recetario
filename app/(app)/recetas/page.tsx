@@ -1,15 +1,30 @@
-// Listado de recetas (vegetarianas primero). La búsqueda y los filtros llegan en la parte 5.
+// Listado de recetas (vegetarianas primero) con buscador y filtros.
+// Aquí solo cargamos los datos; el filtrado ocurre al instante en components/RecipeList.
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
-import RecipeCard from "@/components/RecipeCard";
+import RecipeList, { type RecipeFilters } from "@/components/RecipeList";
 import { PlusIcon } from "@/components/icons";
 import { listRecipes } from "@/lib/recipes";
+import { DISH_TYPES, type DishType } from "@/types/recipe";
 
 export const metadata: Metadata = { title: "Recetas" };
 
-export default async function RecipesPage() {
-  const recipes = await listRecipes();
+// Lee los filtros de la dirección (?q=…&fav=1&veg=1&tipo=…&etiqueta=…).
+function filtersFromParams(params: Record<string, string | string[] | undefined>): RecipeFilters {
+  const get = (key: string) => (typeof params[key] === "string" ? (params[key] as string) : "");
+  const tipo = get("tipo");
+  return {
+    q: get("q"),
+    favorites: get("fav") === "1",
+    vegetarian: get("veg") === "1",
+    dishType: DISH_TYPES.includes(tipo as DishType) ? (tipo as DishType) : null,
+    tag: get("etiqueta") || null,
+  };
+}
+
+export default async function RecipesPage({ searchParams }: PageProps<"/recetas">) {
+  const [recipes, params] = await Promise.all([listRecipes(), searchParams]);
 
   return (
     <>
@@ -40,13 +55,7 @@ export default async function RecipesPage() {
           </Link>
         </div>
       ) : (
-        <ul className="mt-4 flex flex-col gap-3">
-          {recipes.map((recipe) => (
-            <li key={recipe.id}>
-              <RecipeCard recipe={recipe} />
-            </li>
-          ))}
-        </ul>
+        <RecipeList recipes={recipes} initialFilters={filtersFromParams(params)} />
       )}
     </>
   );

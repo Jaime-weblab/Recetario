@@ -1,18 +1,25 @@
 // Lectura de recetas desde Supabase (solo en el servidor).
 // La seguridad RLS ya garantiza que cada usuario solo recibe SUS recetas.
 import { createClient } from "@/lib/supabase/server";
-import type { Recipe, RecipeWithDetails } from "@/types/recipe";
+import type { RecipeListItem, RecipeWithDetails } from "@/types/recipe";
 
 // Listado de recetas: vegetarianas primero, luego por título.
-export async function listRecipes(): Promise<Recipe[]> {
+// Incluye los nombres de los ingredientes de cada receta, para poder buscar por ellos.
+export async function listRecipes(): Promise<RecipeListItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("recipes")
-    .select("*")
+    .select("*, lines:recipe_ingredients (ingredient:ingredients (name))")
     .order("is_vegetarian", { ascending: false })
     .order("title", { ascending: true });
   if (error) throw new Error(`No se pudieron cargar las recetas: ${error.message}`);
-  return data as Recipe[];
+
+  // Aplanamos "lines" a una simple lista de nombres.
+  type Row = RecipeListItem & { lines: { ingredient: { name: string } | null }[] };
+  return (data as unknown as Row[]).map(({ lines, ...recipe }) => ({
+    ...recipe,
+    ingredient_names: lines.map((l) => l.ingredient?.name).filter((n): n is string => Boolean(n)),
+  }));
 }
 
 // Receta completa (con ingredientes y pasos) o null si no existe / no es mía.

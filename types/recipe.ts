@@ -59,6 +59,9 @@ export type Recipe = {
   updated_at: string;
 };
 
+// Receta del listado: sus datos + los nombres de sus ingredientes (para poder buscar por ellos).
+export type RecipeListItem = Recipe & { ingredient_names: string[] };
+
 // Una línea de ingredientes de una receta, con el nombre del ingrediente ya unido.
 export type RecipeIngredientLine = {
   id: string;
