@@ -40,7 +40,9 @@ Ingredientes siempre estructurados (nombre + cantidad + unidad), nunca como text
 para poder sumar cantidades en la lista de la compra.
 
 - **recipes**: id, user_id, title, description, servings, prep_minutes, cook_minutes,
-  category, tags (array), is_vegetarian, main_ingredient, dish_type, photo_url, source_url, notes, is_favorite, created_at, updated_at
+  tags (array), is_vegetarian, main_ingredient, dish_type, photo_url, source_url, notes, is_favorite, created_at, updated_at
+  (sin categorías, decidido el 27-09-2026; se filtra por tipo de plato, etiquetas y favoritas)
+- **dish_type** (lista fija): legumbre, pasta, arroz, verdura, huevo, pescado, carne, sopa (sopa o crema), ensalada, otro
 - **ingredients** (catálogo propio): id, user_id, name, default_unit, shopping_section
   (frutería, carnicería, pescadería, lácteos, despensa, congelados, otros)
 - **recipe_ingredients**: id, recipe_id, ingredient_id, quantity, unit, note (ej. "picado"), position
@@ -64,9 +66,19 @@ Genera las migraciones SQL en `supabase/migrations/`.
 
 ### Fase 1 — Recetario
 - Crear, editar, borrar y ver recetas (con ingredientes, pasos y foto).
-- Listado con búsqueda, filtro por categoría/etiqueta y favoritas.
+- Listado con búsqueda, filtro por tipo de plato/etiqueta y favoritas.
 - Escalado de raciones en la ficha de receta.
+- Las recetas se añaden sobre todo **desde el móvil**: formulario pensado para iPhone.
+  El formulario debe poder abrirse pre-rellenado, porque la importación (Fase 1B) lo rellenará
+  y yo solo revisaré y guardaré.
+- Fotos del plato en Supabase Storage, bucket público (URLs no adivinables), redimensionadas en el móvil antes de subir.
 - ✅ Hecho cuando: puedo guardar y consultar recetas cómodamente desde el móvil.
+
+### Fase 1B — Importar recetas (adelantada de la Fase 4, decidido el 27-09-2026)
+- Importar desde página web (pegar URL) y desde foto (libro, captura), con Claude en el servidor.
+- El resultado abre el formulario de receta pre-rellenado para revisar antes de guardar.
+- En iPhone: pegar el enlace en la app; opcionalmente un Atajo de iOS en el menú Compartir.
+- ✅ Hecho cuando: puedo importar una receta de una web o de una foto en un solo paso.
 
 ### Fase 2 — Planificación semanal
 - Pantalla de Inicio según el boceto: selector de día (L–D) + tarjetas Comida y Cena.
@@ -81,13 +93,12 @@ Genera las migraciones SQL en `supabase/migrations/`.
 - ✅ Hecho cuando: voy al súper solo con la lista del móvil.
 
 ### Fase 4 — Asesoramiento con IA
-- Importar receta desde URL o texto pegado (Claude la convierte a nuestro formato estructurado).
-- Importar receta desde foto (libro, captura).
+- (Importar desde URL/foto: movido a la Fase 1B.)
 - Sugerir un plan semanal a partir de mis recetas, aplicando los "Criterios de alimentación"
   (prioridad vegetariana, variedad, sin repetir platos recientes).
 - Sugerir qué cocinar con lo que tengo.
 - Modelo: `claude-sonnet-5`. Respuestas en JSON validado antes de guardar.
-- ✅ Hecho cuando: puedo importar una receta de una web en un solo paso.
+- ✅ Hecho cuando: me sugiere un menú semanal variado y con prioridad vegetariana a partir de mis recetas.
 
 ### Ideas futuras (no implementar todavía)
 Despensa/inventario, información nutricional, compartir con otra persona, exportar a PDF, modo cocina paso a paso.
