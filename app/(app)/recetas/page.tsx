@@ -31,13 +31,22 @@ export default async function RecipesPage({ searchParams }: PageProps<"/recetas"
       <PageHeader
         title="Recetas"
         action={
-          <Link
-            href="/recetas/nueva"
-            aria-label="Nueva receta"
-            className="flex size-11 items-center justify-center rounded-control bg-accent text-on-accent"
-          >
-            <PlusIcon className="size-6" />
-          </Link>
+          <div className="flex gap-2">
+            {/* Importar desde web o fotos (Fase 1B) */}
+            <Link
+              href="/recetas/importar"
+              className="flex h-11 items-center rounded-control border border-accent px-3 text-sm font-medium text-accent"
+            >
+              Importar
+            </Link>
+            <Link
+              href="/recetas/nueva"
+              aria-label="Nueva receta"
+              className="flex size-11 items-center justify-center rounded-control bg-accent text-on-accent"
+            >
+              <PlusIcon className="size-6" />
+            </Link>
+          </div>
         }
       />
 
@@ -46,13 +55,21 @@ export default async function RecipesPage({ searchParams }: PageProps<"/recetas"
         <div className="mt-10 text-center">
           <p className="font-serif text-xl">Empieza tu recetario</p>
           <p className="mt-1 text-sm text-muted">Guarda tu primera receta para verla aquí.</p>
-          <Link
-            href="/recetas/nueva"
-            className="mt-6 inline-flex h-11 items-center gap-2 rounded-control bg-accent px-5 font-semibold text-on-accent"
-          >
-            <PlusIcon className="size-4" />
-            Nueva receta
-          </Link>
+          <div className="mt-6 flex justify-center gap-2">
+            <Link
+              href="/recetas/nueva"
+              className="inline-flex h-11 items-center gap-2 rounded-control bg-accent px-5 font-semibold text-on-accent"
+            >
+              <PlusIcon className="size-4" />
+              Nueva receta
+            </Link>
+            <Link
+              href="/recetas/importar"
+              className="inline-flex h-11 items-center rounded-control border border-accent px-5 font-semibold text-accent"
+            >
+              Importar
+            </Link>
+          </div>
         </div>
       ) : (
         <RecipeList recipes={recipes} initialFilters={filtersFromParams(params)} />

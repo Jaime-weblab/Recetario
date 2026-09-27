@@ -8,8 +8,8 @@ const MAX_SIDE = 1600;
 const JPEG_QUALITY = 0.82;
 
 // Reduce una imagen (p. ej. la foto de la cámara del iPhone, de 4000 px y varios MB)
-// a MAX_SIDE px y la convierte a JPEG. Todo ocurre en el propio móvil, sin librerías.
-export async function resizeImage(file: File): Promise<Blob> {
+// a `maxSide` px (por defecto MAX_SIDE) y la convierte a JPEG. Todo ocurre en el propio móvil, sin librerías.
+export async function resizeImage(file: File, maxSide = MAX_SIDE): Promise<Blob> {
   // Cargamos la imagen en un <img> (el navegador ya la gira según la orientación de la cámara).
   const url = URL.createObjectURL(file);
   try {
@@ -17,7 +17,7 @@ export async function resizeImage(file: File): Promise<Blob> {
     img.src = url;
     await img.decode();
 
-    const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+    const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
     const width = Math.round(img.naturalWidth * scale);
     const height = Math.round(img.naturalHeight * scale);
 
@@ -66,4 +66,15 @@ export async function uploadRecipePhoto(file: File): Promise<string> {
   if (error) throw new Error(error.message);
 
   return supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+// Convierte una imagen (Blob) a texto base64 sin la cabecera "data:...;base64,",
+// que es el formato en el que se envían las fotos a Claude.
+export function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
 }
