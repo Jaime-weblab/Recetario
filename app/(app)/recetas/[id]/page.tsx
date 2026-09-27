@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AddToPlanButton from "@/components/AddToPlanButton";
 import DeleteRecipeButton from "@/components/DeleteRecipeButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { ChevronLeftIcon, ClockIcon, LeafIcon } from "@/components/icons";
@@ -60,6 +61,11 @@ export default async function RecipePage({ params }: PageProps<"/recetas/[id]">)
       </div>
 
       {recipe.description && <p className="mt-4">{recipe.description}</p>}
+
+      {/* Planificar esta receta en un día de la semana */}
+      <div className="mt-5">
+        <AddToPlanButton recipeId={recipe.id} servings={recipe.servings} />
+      </div>
 
       {/* Ingredientes: cantidad a la izquierda, nombre (y nota) a la derecha */}
       {recipe.ingredients.length > 0 && (

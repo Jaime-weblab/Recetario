@@ -1,24 +1,44 @@
-// Pantalla de Inicio. En la Fase 2 tendrá el selector de días y las tarjetas Comida/Cena.
-// Por ahora (Fase 0) solo confirma que has entrado y permite cerrar sesión.
-import PageHeader from "@/components/PageHeader";
-import { createClient } from "@/lib/supabase/server";
+// Pantalla de Inicio: el menú de la semana (Fase 2).
+// Lee de la dirección qué semana y qué día mostrar (?semana=AAAA-MM-DD&dia=0..6);
+// por defecto, la semana actual y hoy. La interacción está en components/WeekPlanner.
+import WeekPlanner from "@/components/WeekPlanner";
+import { isIsoDate, mondayOf, today, weekdayIndex } from "@/lib/dates";
+import { getWeekPlan } from "@/lib/plan";
+import { listRecipes } from "@/lib/recipes";
 
-export default async function HomePage() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const email = data?.claims?.email as string | undefined;
+export default async function HomePage({ searchParams }: PageProps<"/">) {
+  const params = await searchParams;
+  const todayIso = today();
+
+  // Semana: la indicada (normalizada a su lunes) o la actual.
+  const semana = typeof params.semana === "string" ? params.semana : null;
+  const monday = isIsoDate(semana) ? mondayOf(semana) : mondayOf(todayIso);
+
+  // Día: el indicado; si no, hoy (si es esta semana) o el lunes.
+  const diaParam = Number(params.dia);
+  const initialDay =
+    Number.isInteger(diaParam) && diaParam >= 0 && diaParam <= 6
+      ? diaParam
+      : monday === mondayOf(todayIso)
+        ? weekdayIndex(todayIso)
+        : 0;
+
+  const [entries, recipes] = await Promise.all([getWeekPlan(monday), listRecipes()]);
 
   return (
     <>
-      <PageHeader title="Inicio" />
-      <div className="mt-4 rounded-card border border-line bg-surface p-5">
-        <p className="text-muted">Has entrado como</p>
-        <p className="mb-4 font-medium break-all">{email}</p>
-        <p className="text-sm text-muted">Aquí irá el menú de la semana (Fase 2).</p>
-      </div>
-      {/* Formulario POST → /auth/signout */}
-      <form action="/auth/signout" method="post" className="mt-6">
-        <button type="submit" className="h-11 w-full rounded-control border border-line text-sm text-muted">
+      <WeekPlanner
+        // `key` fuerza a empezar de cero al cambiar de semana (día elegido, hojas abiertas…).
+        key={monday}
+        monday={monday}
+        todayIso={todayIso}
+        initialDay={initialDay}
+        entries={entries}
+        recipes={recipes}
+      />
+      {/* Cerrar sesión (discreto, al final de Inicio) */}
+      <form action="/auth/signout" method="post" className="mt-4 text-center">
+        <button type="submit" className="h-11 px-4 text-sm text-muted underline">
           Cerrar sesión
         </button>
       </form>
