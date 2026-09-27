@@ -4,8 +4,8 @@
 import sharp from "sharp";
 import { mkdir } from "node:fs/promises";
 
-const GREEN = "#3f7d4e";
-const CREAM = "#f7f6f2";
+const GREEN = "#5f6f2a"; // verde oliva (--accent)
+const CREAM = "#f1efe4"; // crudo (--background)
 
 // Dibujo del icono: un cuenco con vapor sobre fondo verde. Lienzo de 512×512.
 // "scale" encoge el dibujo hacia el centro (los iconos "maskable" necesitan margen extra

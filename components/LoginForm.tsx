@@ -73,9 +73,9 @@ export default function LoginForm() {
   }
 
   const inputClass =
-    "h-12 w-full rounded-xl border border-line bg-surface px-4 text-base outline-none focus:border-accent";
+    "h-12 w-full rounded-control border border-line bg-surface px-4 text-base outline-none focus:border-accent";
   const buttonClass =
-    "h-12 w-full rounded-xl bg-accent font-semibold text-white disabled:opacity-50";
+    "h-12 w-full rounded-control bg-accent font-semibold text-on-accent disabled:opacity-50";
 
   if (step === "email") {
     return (

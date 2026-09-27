@@ -28,8 +28,8 @@ export const viewport: Viewport = {
   viewportFit: "cover", // ocupa toda la pantalla; los márgenes los ponemos con safe-top/safe-bottom
   // Color de la barra del sistema, según modo claro/oscuro (igual que --background).
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f6f2" },
-    { media: "(prefers-color-scheme: dark)", color: "#121210" },
+    { media: "(prefers-color-scheme: light)", color: "#f1efe4" },
+    { media: "(prefers-color-scheme: dark)", color: "#15160f" },
   ],
 };
 

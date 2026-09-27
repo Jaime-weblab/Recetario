@@ -11,14 +11,14 @@ export default async function HomePage() {
   return (
     <>
       <PageHeader title="Inicio" />
-      <div className="rounded-2xl border border-line bg-surface p-5">
+      <div className="mt-4 rounded-card border border-line bg-surface p-5">
         <p className="text-muted">Has entrado como</p>
         <p className="mb-4 font-medium break-all">{email}</p>
         <p className="text-sm text-muted">Aquí irá el menú de la semana (Fase 2).</p>
       </div>
       {/* Formulario POST → /auth/signout */}
       <form action="/auth/signout" method="post" className="mt-6">
-        <button type="submit" className="h-11 w-full rounded-xl border border-line text-sm text-muted">
+        <button type="submit" className="h-11 w-full rounded-control border border-line text-sm text-muted">
           Cerrar sesión
         </button>
       </form>

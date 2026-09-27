@@ -1,38 +1,55 @@
-/* Estilos globales: Tailwind + la paleta de colores de la app (claro y oscuro). */
+/* Estilos globales: Tailwind + el "sistema de diseño" de la app.
+   Todo el aspecto visual (colores, esquinas, tipografía) se define AQUÍ, en un solo sitio.
+   Estilo elegido: paleta "Oliva" + formas "Cuaderno" (esquinas casi rectas, bordes finos,
+   títulos con serifa). */
 @import "tailwindcss";
 
-/* ---- Paleta (modo claro) ----
+/* ---- Paleta Oliva (modo claro) ----
    Se usa en Tailwind como bg-background, text-muted, border-line, bg-accent, etc. */
 :root {
-  --background: #f7f6f2; /* fondo general, blanco roto cálido */
+  --background: #f1efe4; /* fondo general, crudo */
   --surface: #ffffff; /* tarjetas y campos */
-  --foreground: #1c1b19; /* texto principal */
-  --muted: #6b675f; /* texto secundario */
-  --line: #e4e1d9; /* bordes y separadores */
-  --accent: #3f7d4e; /* verde "huerta": botones y elemento activo */
+  --foreground: #26281c; /* texto principal */
+  --muted: #6e705c; /* texto secundario */
+  --line: #dcd9c6; /* bordes y separadores */
+  --accent: #5f6f2a; /* verde oliva: botones y elemento activo */
+  --on-accent: #ffffff; /* texto encima del color principal */
+  --highlight: #d9a826; /* mostaza: pequeños detalles (puntos, marcas) */
 }
 
 /* ---- Modo oscuro: se activa solo si el sistema (iPhone) está en oscuro ---- */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #121210;
-    --surface: #1d1c19;
-    --foreground: #eeece6;
-    --muted: #a19c92;
-    --line: #2e2d29;
-    --accent: #5fa56f;
+    --background: #15160f;
+    --surface: #20221a;
+    --foreground: #ecebdf;
+    --muted: #a3a48e;
+    --line: #33352a;
+    --accent: #9fb05a;
+    --on-accent: #15160f; /* el oliva claro necesita texto oscuro encima */
+    --highlight: #e0b640;
   }
 }
 
 /* Conecta las variables anteriores con las clases de Tailwind. */
 @theme inline {
+  /* Colores → bg-*, text-*, border-* */
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-highlight: var(--highlight);
+
+  /* Tipografía → font-sans (texto) y font-serif (títulos) */
   --font-sans: var(--font-geist-sans);
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  /* Esquinas "Cuaderno" → rounded-card (tarjetas) y rounded-control (botones, campos) */
+  --radius-card: 6px;
+  --radius-control: 4px;
 }
 
 /* ---- Safe areas: márgenes para el notch / isla y la barra de gestos del iPhone ----

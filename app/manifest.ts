@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     display: "standalone", // sin barra del navegador
     orientation: "portrait",
-    background_color: "#f7f6f2",
-    theme_color: "#3f7d4e",
+    background_color: "#f1efe4",
+    theme_color: "#5f6f2a",
     // Iconos generados con scripts/generate-icons.mjs
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },

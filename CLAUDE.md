@@ -97,6 +97,13 @@ Despensa/inventario, información nutricional, compartir con otra persona, expor
 - Objetivos táctiles de mínimo 44 px.
 - Navegación inferior con 3 iconos: **Inicio** (casa) · **Recetas** · **Lista de la compra**.
 
+### Estilo visual (elegido el 27-09-2026)
+- **Paleta "Oliva"**: fondo crudo, verde oliva como color principal y mostaza para pequeños detalles.
+- **Formas "Cuaderno"**: esquinas casi rectas, bordes finos, títulos con serifa (los de tarjeta en cursiva).
+- **Tarjetas de receta**: foto pequeña cuadrada a la izquierda y título + datos a la derecha.
+- Colores, esquinas y tipografías se definen solo en `app/globals.css` (clases `bg-accent`, `text-muted`,
+  `border-line`, `rounded-card`, `rounded-control`, `font-serif`...). No usar colores sueltos en componentes.
+
 ### Pantalla de Inicio (boceto `docs/bocetos/inicio.jpeg`)
 - Arriba, selector de días de la semana en una fila: L M X J V S D. El día actual aparece
   seleccionado por defecto y marcado visualmente.
