@@ -1,8 +1,9 @@
 "use client";
 // Formulario de acceso en dos pasos:
 //   1. Escribes tu email → Supabase te envía un email con enlace mágico y código de 6 dígitos.
-//   2. Escribes el código aquí (imprescindible en la app instalada del iPhone, que no comparte
-//      sesión con Safari) o pulsas el enlace si estás en el mismo navegador.
+//   2. Pulsas el enlace en el mismo navegador, o escribes el código aquí.
+//      Nota: con el correo por defecto de Supabase solo llega el enlace. En iPhone se entra
+//      en Safari y DESPUÉS se añade a la pantalla de inicio (iOS copia la sesión a la app).
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -83,8 +84,11 @@ export default function LoginForm() {
   return (
     <form onSubmit={verifyCode} className="flex flex-col gap-3">
       <p className="text-sm text-muted">
-        Revisa <strong>{email}</strong>. Escribe el código del email o pulsa el enlace.
+        Revisa <strong>{email}</strong> y pulsa el enlace del email desde este mismo navegador.
       </p>
+      {/* El código solo llega si la plantilla del email incluye {{ .Token }}
+          (requiere SMTP propio en Supabase). Mientras tanto, el campo es opcional. */}
+      <p className="mt-2 text-xs text-muted">¿Te ha llegado un código? Escríbelo aquí:</p>
       <input
         type="text"
         required
