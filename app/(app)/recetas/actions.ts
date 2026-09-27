@@ -6,6 +6,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PHOTO_BUCKET, photoPathFromUrl } from "@/lib/photo-paths";
 import { DISH_TYPES, UNITS, type RecipeInput } from "@/types/recipe";
 
 // Devuelve el cliente de Supabase y el id del usuario, o lanza error si no hay sesión.
@@ -22,6 +23,15 @@ const clean = (s: string | null | undefined) => {
   const t = (s ?? "").trim();
   return t ? t : null;
 };
+
+// Borra una foto del almacenamiento a partir de su URL (si es de nuestro bucket).
+// Si falla no pasa nada grave (quedaría un archivo huérfano), así que solo lo anotamos.
+async function removePhoto(supabase: Awaited<ReturnType<typeof createClient>>, url: string | null) {
+  const path = photoPathFromUrl(url);
+  if (!path) return;
+  const { error } = await supabase.storage.from(PHOTO_BUCKET).remove([path]);
+  if (error) console.error("removePhoto", error.message);
+}
 
 // Número entero ≥ 0 o null.
 const minutes = (n: number | null) =>
@@ -64,7 +74,8 @@ function validate(input: RecipeInput) {
     is_vegetarian: Boolean(input.is_vegetarian),
     main_ingredient: clean(input.main_ingredient),
     dish_type: input.dish_type && DISH_TYPES.includes(input.dish_type) ? input.dish_type : null,
-    photo_url: clean(input.photo_url),
+    // Solo aceptamos fotos subidas a nuestro propio almacenamiento.
+    photo_url: photoPathFromUrl(input.photo_url) ? clean(input.photo_url) : null,
     source_url: sourceUrl,
     notes: clean(input.notes),
   };
@@ -115,9 +126,13 @@ export async function saveRecipe(id: string | null, input: RecipeInput): Promise
   const { recipe, ingredients, steps } = checked;
 
   let recipeId = id;
+  // Foto que tenía la receta antes de editarla (para borrarla si se cambia o se quita).
+  let oldPhotoUrl: string | null = null;
   try {
     // 1. Datos principales de la receta.
     if (recipeId) {
+      const { data: old } = await supabase.from("recipes").select("photo_url").eq("id", recipeId).maybeSingle();
+      oldPhotoUrl = old?.photo_url ?? null;
       const { error } = await supabase.from("recipes").update(recipe).eq("id", recipeId);
       if (error) throw new Error(error.message);
     } else {
@@ -166,15 +181,21 @@ export async function saveRecipe(id: string | null, input: RecipeInput): Promise
     return { error: "No se ha podido guardar la receta. Inténtalo de nuevo." };
   }
 
+  // Guardado correcto: si la foto ha cambiado o se ha quitado, borramos la antigua.
+  if (oldPhotoUrl && oldPhotoUrl !== recipe.photo_url) await removePhoto(supabase, oldPhotoUrl);
+
   revalidatePath("/recetas");
   redirect(`/recetas/${recipeId}`);
 }
 
-// Borra una receta (sus ingredientes y pasos se borran solos, en cascada) y vuelve al listado.
+// Borra una receta (sus ingredientes y pasos se borran solos, en cascada), su foto,
+// y vuelve al listado.
 export async function deleteRecipe(id: string) {
   const { supabase } = await requireUser();
+  const { data: old } = await supabase.from("recipes").select("photo_url").eq("id", id).maybeSingle();
   const { error } = await supabase.from("recipes").delete().eq("id", id);
   if (error) throw new Error("No se ha podido borrar la receta.");
+  await removePhoto(supabase, old?.photo_url ?? null);
   revalidatePath("/recetas");
   redirect("/recetas");
 }

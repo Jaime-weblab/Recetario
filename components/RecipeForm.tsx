@@ -6,6 +6,7 @@
 // Al guardar envía un único objeto RecipeInput a la acción del servidor `saveRecipe`.
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import PhotoPicker from "@/components/PhotoPicker";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { saveRecipe } from "@/app/(app)/recetas/actions";
 import { formatNumber, parseQuantity } from "@/lib/units";
@@ -86,6 +87,8 @@ export default function RecipeForm({
   const [notes, setNotes] = useState(initial.notes);
   const [tags, setTags] = useState(initial.tags.join(", "));
   const [sourceUrl, setSourceUrl] = useState(initial.source_url);
+  const [photoUrl, setPhotoUrl] = useState(initial.photo_url);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [ingredients, setIngredients] = useState<IngredientRow[]>(() =>
     initial.ingredients.length
       ? initial.ingredients.map((i) => ({
@@ -137,7 +140,7 @@ export default function RecipeForm({
       is_vegetarian: isVegetarian,
       main_ingredient: mainIngredient,
       dish_type: dishType || null,
-      photo_url: initial.photo_url,
+      photo_url: photoUrl,
       source_url: sourceUrl,
       notes,
       ingredients: ingredients.map((r) => ({
@@ -164,6 +167,9 @@ export default function RecipeForm({
           <option key={name} value={name} />
         ))}
       </datalist>
+
+      {/* ---------- Foto del plato ---------- */}
+      <PhotoPicker value={photoUrl} onChange={setPhotoUrl} onUploadingChange={setUploadingPhoto} />
 
       {/* ---------- Datos básicos ---------- */}
       <section className="flex flex-col gap-4">
@@ -336,8 +342,8 @@ export default function RecipeForm({
       {/* ---------- Guardar / cancelar ---------- */}
       <div className="flex flex-col gap-2">
         {error && <p className="text-sm text-red-700 dark:text-red-400">{error}</p>}
-        <button type="submit" disabled={pending} className="h-12 w-full rounded-control bg-accent font-semibold text-on-accent disabled:opacity-50">
-          {pending ? "Guardando…" : "Guardar receta"}
+        <button type="submit" disabled={pending || uploadingPhoto} className="h-12 w-full rounded-control bg-accent font-semibold text-on-accent disabled:opacity-50">
+          {pending ? "Guardando…" : uploadingPhoto ? "Subiendo foto…" : "Guardar receta"}
         </button>
         <Link href={recipeId ? `/recetas/${recipeId}` : "/recetas"} className="flex h-11 items-center justify-center text-sm text-muted">
           Cancelar
