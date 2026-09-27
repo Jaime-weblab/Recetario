@@ -55,7 +55,7 @@ Genera las migraciones SQL en `supabase/migrations/`.
 
 ## Fases
 
-### Fase 0 — Base del proyecto
+### Fase 0 — Base del proyecto — ✅ CERRADA (27-09-2026)
 - Proyecto Next.js + Tailwind + Supabase configurado.
 - Login con magic link. Rutas protegidas.
 - PWA: manifest, iconos, meta tags de iOS, respeto de safe areas.
