@@ -98,7 +98,8 @@ Genera las migraciones SQL en `supabase/migrations/`.
   (prioridad vegetariana, variedad, sin repetir platos recientes).
   Deseo expreso (27-09-2026): que los días de la semana se rellenen con sugerencias, **al menos las cenas**
   (rellenar solo los huecos vacíos; yo reviso y cambio lo que quiera).
-- Sugerir qué cocinar con lo que tengo.
+- Sugerir qué cocinar con lo que tengo. — APARCADO (27-09-2026): no lo quiero de momento.
+- (Hecho, adelantado: botón "Sugerir menú" en Inicio que rellena huecos vacíos, por defecto las cenas.)
 - Modelo: `claude-sonnet-5`. Respuestas en JSON validado antes de guardar.
 - ✅ Hecho cuando: me sugiere un menú semanal variado y con prioridad vegetariana a partir de mis recetas.
 
