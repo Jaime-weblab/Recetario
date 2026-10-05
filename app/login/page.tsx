@@ -12,10 +12,10 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
     <main className="safe-top safe-bottom flex min-h-dvh flex-col justify-center px-6">
       <div className="mx-auto w-full max-w-sm">
         <h1 className="mb-2 font-serif text-4xl">Recetario</h1>
-        <p className="mb-8 text-muted">Entra con tu email. Te enviaremos un enlace de acceso.</p>
+        <p className="mb-8 text-muted">Entra con tu email y contraseña.</p>
         {error === "enlace" && (
           <p className="mb-4 rounded-card bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
-            El enlace no es válido o ha caducado. Pide uno nuevo o usa el código.
+            El enlace no es válido o ha caducado. Entra con tu contraseña o pide un enlace nuevo.
           </p>
         )}
         <LoginForm />
