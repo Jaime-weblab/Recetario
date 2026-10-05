@@ -74,6 +74,13 @@ export default async function RecipesPage({ searchParams }: PageProps<"/recetas"
       ) : (
         <RecipeList recipes={recipes} initialFilters={filtersFromParams(params)} />
       )}
+
+      {/* Enlace discreto a la cuenta (contraseña, cerrar sesión) */}
+      <div className="mt-8 text-center">
+        <Link href="/cuenta" className="inline-flex h-11 items-center px-4 text-sm text-muted underline">
+          Cuenta y contraseña
+        </Link>
+      </div>
     </>
   );
 }
